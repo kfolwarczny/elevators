@@ -18,3 +18,10 @@ management:
       enabled: true
     threaddump:
       enabled: true
+
+
+application:
+  number-of-floors: 5
+  number-of-underground-floors: 0
+  number-of-elevators: 5
+  floor-passing-time: 5000
