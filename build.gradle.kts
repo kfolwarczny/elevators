@@ -37,6 +37,7 @@ dependencies {
         exclude(group = "org.junit.vintage", module = "junit-vintage-engine")
     }
     testImplementation("io.projectreactor:reactor-test")
+    
     testImplementation("io.kotlintest:kotlintest-runner-junit5:${Versions.KOTLIN_TEST}")
     testImplementation("io.kotlintest:kotlintest-extensions-spring:${Versions.KOTLIN_TEST}")
     testImplementation("io.kotlintest:kotlintest-assertions-arrow:${Versions.KOTLIN_TEST}")
