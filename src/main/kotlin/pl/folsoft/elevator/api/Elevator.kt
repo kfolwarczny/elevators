@@ -1,12 +1,24 @@
 package pl.folsoft.elevator.api
 
+import arrow.core.Option
+
 interface Elevator {
 
     /**
      * Enumeration for describing elevator's direction.
      */
-    enum class Direction {
-        UP, DOWN, NONE
+    enum class Direction() {
+        UP,
+        DOWN,
+        NONE;
+
+        val getOpposite = {
+            when (this) {
+                UP -> DOWN
+                DOWN -> UP
+                NONE -> NONE
+            }
+        }
     }
 
     /**
@@ -21,7 +33,7 @@ interface Elevator {
      *
      * @return primitive integer number of floor
      */
-    fun getAddressedFloor(): Int
+    fun getAddressedFloor(): Option<Int>
 
     /**
      * Get the Id of this elevator.
