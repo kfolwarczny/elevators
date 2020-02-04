@@ -1,6 +1,7 @@
 package pl.folsoft.elevator
 
 import arrow.core.Option
+import arrow.core.Some
 import arrow.core.extensions.list.foldable.find
 import arrow.core.none
 import arrow.core.orElse
@@ -43,6 +44,7 @@ class ElevatorManager(private val applicationProperties: ApplicationProperties,
                 else -> lifts.find { it.currentFloor() == toFloor }
             }
         }
+                .peek { it.moveElevator(toFloor) }
     }
 
     private fun requestLiftFromFloor(direction: Elevator.Direction, minFun: (Lift) -> Int) =
@@ -73,12 +75,22 @@ class ElevatorManager(private val applicationProperties: ApplicationProperties,
     override fun getElevators() = lifts.toList()
 
     override fun releaseElevator(elevator: Elevator) {
-        TODO("not implemented") //To change body of created functions use File | Settings | File Templates.
+        elevator.cancelRequest()
     }
 
     companion object {
         val LOGGER: Logger = LoggerFactory.getLogger(ElevatorManager::class.java)
 
         const val GROUND_FLOOR = 0
+    }
+}
+
+private fun <A> Option<A>.peek(f: (A) -> Unit): Option<A> {
+    return when (this) {
+        is Some -> {
+            f(this.t)
+            this
+        }
+        else -> this
     }
 }

@@ -62,4 +62,6 @@ interface Elevator {
      * @return int actual floor at the moment.
      */
     fun currentFloor(): Int
+
+    fun cancelRequest(): Unit?
 }
