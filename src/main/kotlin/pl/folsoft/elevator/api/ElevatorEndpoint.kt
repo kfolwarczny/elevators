@@ -21,10 +21,17 @@ class ElevatorEndpoint {
             req.bodyToMono(LiftRequest::class.java)
                     .flatMap {
                         elevatorHandler.requestLift(it)
-                                .fold({ notFound().build() }, { noContent().build() })
+                                .fold(
+                                        { notFound().build() },
+                                        { elevator ->
+                                            ok()
+                                                    .contentType(MediaType.APPLICATION_JSON)
+                                                    .bodyValue(LiftResponse(elevator.getId()))
+                                        }
+                                )
                     }
         }
-        POST("/api/elevator/{$LIFT_ID_PARAM}/cancel") {
+        PUT("/api/elevator/{$LIFT_ID_PARAM}/cancel") {
             elevatorHandler.cancelRequest(it.extractLiftId())
                     .fold({ notFound().build() }, { noContent().build() })
         }
@@ -45,4 +52,5 @@ private fun <E> List<E>.serverResponse(): Mono<ServerResponse> {
             .bodyValue(this)
 }
 
+data class LiftResponse(val liftId: Int)
 data class LiftRequest(val toFloor: Int)

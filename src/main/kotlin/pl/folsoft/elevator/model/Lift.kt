@@ -4,6 +4,7 @@ import arrow.core.toOption
 import com.fasterxml.jackson.annotation.JsonGetter
 import com.fasterxml.jackson.annotation.JsonIgnore
 import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
@@ -16,13 +17,13 @@ import kotlin.math.min
 
 data class Lift(private val id: Int,
                 @JsonIgnore private val floorPassingTime: Long,
-                @JsonIgnore private val scope: CoroutineScope,
+                @JsonIgnore private val scope: CoroutineScope = GlobalScope,
                 private var direction: AtomicReference<Elevator.Direction> = AtomicReference(Elevator.Direction.NONE),
                 private var currentFloor: AtomicInteger = AtomicInteger(0)) : Elevator {
 
     @JsonIgnore
     private var job: Job? = null
-    private var addressFloor = AtomicInteger()
+    private var addressFloor = AtomicInteger(0)
 
     override fun getDirection(): Elevator.Direction = direction.get()
     @JsonIgnore
