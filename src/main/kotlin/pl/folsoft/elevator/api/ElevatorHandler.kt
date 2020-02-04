@@ -7,6 +7,8 @@ import org.slf4j.LoggerFactory
 import org.springframework.stereotype.Service
 import pl.folsoft.elevator.ElevatorManager
 
+
+//TODO should be better tested
 @Service
 class ElevatorHandler(private val elevatorManager: ElevatorManager) {
     fun getAllLifts(): List<Elevator> = elevatorManager.getElevators()

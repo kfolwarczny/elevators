@@ -12,6 +12,7 @@ import reactor.core.publisher.Mono
 @Configuration
 class ElevatorEndpoint {
 
+    //TODO should have some openAPI but not yet available for functional endpoints
     @Bean
     fun route(elevatorHandler: ElevatorHandler) = router {
         GET("/api/elevator") {
