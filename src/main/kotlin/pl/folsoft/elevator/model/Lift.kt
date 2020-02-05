@@ -32,7 +32,9 @@ data class Lift(private val id: Int,
     override fun getId() = id
 
     override fun moveElevator(toFloor: Int) {
-        val floorDistance = AtomicInteger(currentFloor.distance(toFloor))
+        if (job?.isActive == true) job?.cancel()
+
+        val floorDistance = AtomicInteger(currentFloor.get().distance(toFloor))
 
         direction.set(when {
             toFloor > currentFloor.get() -> Elevator.Direction.UP
@@ -49,6 +51,7 @@ data class Lift(private val id: Int,
                     direction.get() == Elevator.Direction.DOWN -> currentFloor.decrementAndGet()
                 }
             }
+            direction.set(Elevator.Direction.NONE)
         }
     }
 
@@ -63,8 +66,8 @@ data class Lift(private val id: Int,
     override fun cancelRequest(): Unit? = job?.cancel()
 }
 
-fun AtomicInteger.distance(toNumber: Int): Int {
-    val currentValue = this.get()
+fun Int.distance(toNumber: Int): Int {
+    val currentValue = this
 
     val biggerNum = max(currentValue.absoluteValue, toNumber.absoluteValue)
     val smallerNum = min(currentValue.absoluteValue, toNumber.absoluteValue)

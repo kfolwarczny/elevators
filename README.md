@@ -32,5 +32,7 @@ curl --header "Content-Type: application/json" \
   
 Will request the elevator to given floor
 
+To track the current elevator status visit: ``http://localhost:8080/index.html``
+
 
 

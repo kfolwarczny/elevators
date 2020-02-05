@@ -1,0 +1,113 @@
+<!DOCTYPE html>
+<meta charset="utf-8"/>
+<title>WebSocket Test</title>
+<script language="javascript" type="text/javascript">
+
+    const wsUri = "ws://localhost:8080/ws/lifts";
+    const listLiftsApi = "http://localhost:8080/api/elevator";
+    const requestLiftApi = "http://localhost:8080/api/elevator/request";
+
+    let output;
+
+    function init() {
+        output = document.getElementById("output");
+
+        fetch(listLiftsApi)
+            .then((resp) => {
+                return resp.json()
+            })
+            .then((json) => {
+                json.forEach(addLift);
+
+                connectToWebSocket();
+            });
+    }
+
+    function addLift(lift) {
+        const txt = '<div id="lift-' + lift.id + '">' +
+            '<p>Lift: ' + lift.id + '</p>' +
+            '<p>Busy: <span id="lift-' + lift.id + '-busy">' + lift.busy + '</span></p>' +
+            '<p>Direction: <span id="lift-' + lift.id + '-direction">' + lift.direction + '</span></p>' +
+            '<p>Current floor: <span id="lift-' + lift.id + '-currentFloor">' + lift.currentFloor + '</span></p>' +
+            '<p>Address floor: <span id="lift-' + lift.id + '-addressFloor">' + lift.addressFloor + '</span></p>' +
+            '</div>';
+
+        writeToScreen(txt);
+    }
+
+    function updateLift(lift) {
+        updateElement(lift, 'busy');
+        updateElement(lift, 'direction');
+        updateElement(lift, 'currentFloor');
+        updateElement(lift, 'addressFloor');
+    }
+
+    function updateElement(lift, elName) {
+        const element = document.getElementById("lift-" + lift.id + "-" + elName);
+        element.innerText = lift[elName];
+    }
+
+    function requestLift() {
+        const request = { toFloor: document.getElementById("toFloor").value };
+
+        fetch(requestLiftApi, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify(request),
+        })
+            .catch((error) => {
+                writeToScreen('<span style="color: red;">ERROR:</span> ' + error);
+                console.error('Error:', error);
+            });
+    }
+
+    function connectToWebSocket() {
+        const websocket = new WebSocket(wsUri);
+        websocket.onopen = function () {
+            writeToScreen("WebSocket: CONNECTED")
+        };
+        websocket.onclose = function () {
+            writeToScreen("WebSocket: CLOSING")
+        };
+        websocket.onmessage = function (evt) {
+            onMessage(evt)
+        };
+        websocket.onerror = function (evt) {
+            onError(evt)
+        };
+    }
+
+    function onMessage(evt) {
+        const json = JSON.parse(evt.data);
+
+        json.forEach(updateLift);
+    }
+
+    function onError(evt) {
+        writeToScreen('<span style="color: red;">ERROR:</span> ' + evt.data);
+    }
+
+    function writeToScreen(message) {
+        const pre = document.createElement("p");
+        pre.style.wordWrap = "break-word";
+        pre.innerHTML = message;
+        output.appendChild(pre);
+    }
+
+    window.addEventListener("load", init, false);
+
+</script>
+
+<h2>Lifts status page</h2>
+
+<div>
+    <p>Request lift</p>
+    <label for="toFloor">To floor:</label>
+    <input type="text" id="toFloor" name="toFloor">
+    <button onclick="requestLift()">Request</button>
+</div>
+
+
+<div id="output"></div>

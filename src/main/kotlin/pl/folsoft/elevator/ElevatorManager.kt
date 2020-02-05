@@ -18,6 +18,7 @@ import pl.folsoft.elevator.api.Elevator
 import pl.folsoft.elevator.api.ElevatorController
 import pl.folsoft.elevator.model.Lift
 import pl.folsoft.elevator.model.LiftFactory
+import pl.folsoft.elevator.model.distance
 
 @EnableConfigurationProperties(ApplicationProperties::class)
 @Service
@@ -41,24 +42,24 @@ class ElevatorManager(private val applicationProperties: ApplicationProperties,
                 lifts.allOnSameFloor() -> lifts.first().some()
                 lifts.all { it.currentFloor() > toFloor } -> requestLiftFromFloor(Elevator.Direction.DOWN) { it.currentFloor() - toFloor }
                 lifts.all { it.currentFloor() < toFloor } -> requestLiftFromFloor(Elevator.Direction.UP) { toFloor - it.currentFloor() }
-                else -> lifts.find { it.currentFloor() == toFloor }
+                else -> lifts.giveClosestLift(toFloor)
             }
         }
-                .peek { it.moveElevator(toFloor) }
+            .peek { it.moveElevator(toFloor) }
     }
 
     private fun requestLiftFromFloor(direction: Elevator.Direction, minFun: (Lift) -> Int) =
-            if (lifts.all { it.getDirection() == direction.getOpposite() }) {
-                none()
-            } else {
-                lifts
-                        .find { it.isBusy() || it.getDirection() == direction }
-                        .orElse {
-                            lifts.filter { !it.isBusy() }
-                                    .minBy(minFun)
-                                    .toOption()
-                        }
-            }
+        if (lifts.all { it.getDirection() == direction.getOpposite() }) {
+            none()
+        } else {
+            lifts
+                .find { it.isBusy() || it.getDirection() == direction }
+                .orElse {
+                    lifts.filter { !it.isBusy() }
+                        .minBy(minFun)
+                        .toOption()
+                }
+        }
 
     private fun List<Lift>.allOnSameFloor(): Boolean {
         val currentFloor = this.first().currentFloor()
@@ -80,10 +81,16 @@ class ElevatorManager(private val applicationProperties: ApplicationProperties,
 
     companion object {
         val LOGGER: Logger = LoggerFactory.getLogger(ElevatorManager::class.java)
-
-        const val GROUND_FLOOR = 0
     }
 }
+
+private fun List<Lift>.giveClosestLift(toFloor: Int) = this
+    .filterNot { it.isBusy() }
+    .map { it.currentFloor().distance(toFloor) to it }
+    .minBy { it.first }
+    .toOption()
+    .map { it.second }
+
 
 private fun <A> Option<A>.peek(f: (A) -> Unit): Option<A> {
     return when (this) {

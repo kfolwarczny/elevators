@@ -2,6 +2,7 @@ package pl.folsoft.elevator.api
 
 import org.springframework.context.annotation.Bean
 import org.springframework.context.annotation.Configuration
+import org.springframework.core.io.ClassPathResource
 import org.springframework.http.MediaType
 import org.springframework.web.reactive.function.server.ServerRequest
 import org.springframework.web.reactive.function.server.ServerResponse
@@ -36,6 +37,7 @@ class ElevatorEndpoint {
             elevatorHandler.cancelRequest(it.extractLiftId())
                     .fold({ notFound().build() }, { noContent().build() })
         }
+        resources("/**", ClassPathResource("assets/"))
     }
 
     companion object {

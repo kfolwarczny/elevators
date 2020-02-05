@@ -25,3 +25,6 @@ application:
   number-of-underground-floors: 0
   number-of-elevators: 5
   floor-passing-time: 5000
+  socket:
+    mapping: "/ws/lifts"
+    refresh: 3000
